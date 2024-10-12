@@ -18,7 +18,7 @@ fi
 
 git pull "$repo_url" "$branch" || { echo "Не удалось обновить код из репозитория"; exit 1; }
 
-make -C ../first_laboratory_work build_and_clean
+make -C first_laboratory_work build_and_clean
 
 if [ $? -ne 0 ]; then
     echo "Не удалось собрать проект"
