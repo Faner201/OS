@@ -33,7 +33,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-call make -C ..\first_laboratory_work build_and_clean
+call make -C first_laboratory_work build_and_clean
 if %errorlevel% neq 0 (
     echo Не удалось собрать проект
     exit /b 1

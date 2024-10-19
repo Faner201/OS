@@ -2,7 +2,6 @@
 
 class Calculator {
 public:
-    // Метод для сложения двух значений
     int add(int a, int b) {
         return a + b;
     }
@@ -11,8 +10,6 @@ public:
 int main() {
     Calculator calc;
     int value1, value2;
-
-    // Ввод значений с клавиатуры
     std::cout << "Введите первое значение: ";
     std::cin >> value1;
     std::cout << "Введите второе значение: ";
