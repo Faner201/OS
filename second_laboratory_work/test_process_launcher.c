@@ -2,7 +2,7 @@
    #include "process_launcher.h"
 
    int main() {
-       const char *command = "echo Hello, World!";
+       const char *command = "Hello, World!";
        ProcessResult result = launch_process(command);
 
        if (result.success) {
