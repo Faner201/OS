@@ -1,6 +1,7 @@
-#ifndef TEMPERATURE_READER_HPP
-#define TEMPERATURE_READER_HPP
+#ifndef FIFTH_LABORATORY_WORK_MIDDLEWARE_TEMPERATURE_READER_HPP_
+#define FIFTH_LABORATORY_WORK_MIDDLEWARE_TEMPERATURE_READER_HPP_
 
-void RunTemperatureReader();
+#include <pqxx/pqxx>
+void RunTemperatureReader(const pqxx::connection& conn);
 
-#endif // TEMPERATURE_READER_HPP 
+#endif

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -105,20 +106,33 @@ void CloseSerialPort(int serial_port) {
 
 void ReadTemperature(int serial_port, double* temperature) {
   char buffer[256];
-  int n = read(serial_port, buffer, sizeof(buffer));
-  if (n > 0) {
+  std::string data;
+  int n;
+
+  while ((n = read(serial_port, buffer, sizeof(buffer) - 1)) > 0) {
     buffer[n] = '\0';
-    *temperature = atof(buffer);
+    data += buffer;
+
+    if (n < sizeof(buffer) - 1) {
+      break;
+    }
+  }
+
+  if (!data.empty()) {
+    *temperature = atof(data.c_str());
   }
 }
 
 #endif
+
+std::unordered_map<std::string, int> log_line_count;
 
 void WriteToLog(const std::string& filename, const std::string& data) {
   std::ofstream log_file(filename, std::ios::app);
   if (log_file.is_open()) {
     log_file << data << std::endl;
     log_file.close();
+    log_line_count[filename]++;
   }
 }
 
@@ -131,22 +145,24 @@ double CalculateAverage(const std::vector<double>& temperatures) {
 }
 
 void ManageLogFile(const std::string& filename, int max_entries) {
-  std::ifstream file(filename);
-  if (!file.is_open()) return;
+  if (log_line_count[filename] > max_entries) {
+    std::ifstream file(filename);
+    if (!file.is_open()) return;
 
-  std::vector<std::string> lines;
-  std::string line;
-  while (std::getline(file, line)) {
-    lines.push_back(line);
-  }
-  file.close();
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(file, line)) {
+      lines.push_back(line);
+    }
+    file.close();
 
-  if (lines.size() > max_entries) {
     std::ofstream out_file(filename);
     for (size_t i = lines.size() - max_entries; i < lines.size(); ++i) {
       out_file << lines[i] << std::endl;
     }
     out_file.close();
+
+    log_line_count[filename] = max_entries;
   }
 }
 
@@ -200,7 +216,7 @@ void RunTemperatureMonitor() {
         std::chrono::steady_clock::now();
     int count_reload = 10;
     do {
-      serial_port = OpenSerialPort("/dev/ttys010");
+      serial_port = OpenSerialPort("/dev/ttys006");
       if (serial_port < 0) {
         count_reload--;
         std::cerr << "Waiting for serial port...\n";

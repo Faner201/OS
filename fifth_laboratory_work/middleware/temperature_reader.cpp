@@ -1,3 +1,4 @@
+#include "middleware/temperature_reader.hpp"
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -107,10 +108,20 @@ void CloseSerialPort(int serial_port) {
 
 void ReadTemperature(int serial_port, double* temperature) {
   char buffer[256];
-  int n = read(serial_port, buffer, sizeof(buffer));
-  if (n > 0) {
+  std::string data;
+  int n;
+
+  while ((n = read(serial_port, buffer, sizeof(buffer) - 1)) > 0) {
     buffer[n] = '\0';
-    *temperature = atof(buffer);
+    data += buffer;
+
+    if (n < sizeof(buffer) - 1) {
+      break;
+    }
+  }
+
+  if (!data.empty()) {
+    *temperature = atof(data.c_str());
   }
 }
 
@@ -124,7 +135,7 @@ double CalculateAverage(const std::vector<double>& temperatures) {
   return sum / temperatures.size();
 }
 
-void RunTemperatureMonitor(pqxx::connection& conn) {
+void RunTemperatureMonitor(pqxx::connection* conn) {
   std::vector<double> hourly_temperatures;
   std::vector<double> daily_averages;
 
@@ -177,7 +188,7 @@ void RunTemperatureMonitor(pqxx::connection& conn) {
 
     std::cout << "Reading temperature..." << std::endl;
 
-    WriteToDatabase(conn, "temperature_log", timestamp, current_temperature);
+    WriteToDatabase(*conn, "temperature_log", timestamp, current_temperature);
     std::cout << "Temperature written to database." << std::endl;
 
     hourly_temperatures.push_back(current_temperature);
@@ -189,7 +200,7 @@ void RunTemperatureMonitor(pqxx::connection& conn) {
             .count() >= 1) {
       double hourly_average = CalculateAverage(hourly_temperatures);
       std::cout << "Hourly average calculated: " << hourly_average << std::endl;
-      WriteToDatabase(conn, "hourly_average_log", timestamp, hourly_average);
+      WriteToDatabase(*conn, "hourly_average_log", timestamp, hourly_average);
       std::cout << "Hourly average written to database." << std::endl;
 
       daily_averages.push_back(hourly_average);
@@ -200,23 +211,24 @@ void RunTemperatureMonitor(pqxx::connection& conn) {
     if (daily_averages.size() == 24) {
       double daily_average = CalculateAverage(daily_averages);
       std::cout << "Daily average calculated: " << daily_average << std::endl;
-      WriteToDatabase(conn, "daily_average_log", timestamp, daily_average);
+      WriteToDatabase(*conn, "daily_average_log", timestamp, daily_average);
       std::cout << "Daily average written to database." << std::endl;
       daily_averages.clear();
     }
   }
 }
 
-}
+}  // namespace
 
 void RunTemperatureReader() {
     initializeDatabase();
 
     auto conn = ConnectToDatabase();
     if (!conn) {
-        std::cerr << "Failed to establish database connection. Exiting..." << std::endl;
+        std::cerr << "Failed to establish database connection. "
+                  << "Exiting..." << std::endl;
         return;
     }
 
-    RunTemperatureMonitor(*conn);
+    RunTemperatureMonitor(conn.get());
 }

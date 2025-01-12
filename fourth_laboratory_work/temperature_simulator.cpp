@@ -109,7 +109,7 @@ int main() {
     if (hSerial == INVALID_HANDLE_VALUE) return -1;
     configureSerialPort(hSerial);
 #else
-    int serial_port = openSerialPort("/dev/ttys009");
+    int serial_port = openSerialPort("/dev/ttys005");
     if (serial_port < 0) return -1;
     configureSerialPort(serial_port);
 #endif
