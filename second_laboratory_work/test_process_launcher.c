@@ -2,7 +2,7 @@
    #include "process_launcher.h"
 
    int main() {
-       const char *command = "Hello, World!";
+       const char *command = "ping -c 1 127.0.0.1";
        ProcessResult result = launch_process(command);
 
        if (result.success) {
