@@ -1,0 +1,10 @@
+[Unit]
+Description=Kiosk Application
+
+[Service]
+ExecStart=/path/to/seventh_laboratory_work/kiosk/kiosk
+WorkingDirectory=/path/to/seventh_laboratory_work/kiosk
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

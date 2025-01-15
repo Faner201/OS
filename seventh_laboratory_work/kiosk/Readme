@@ -1,0 +1,15 @@
+### Как запустить киос
+
+Чтобы произвести запуск киоска, необходимо:
+
+Для Linux:
+1. Скопировать файл kiosk.service в директорию /etc/systemd/system/
+2. Изменить путь к файлу kiosk в файле kiosk.service
+3. Изменить путь к директории в файле kiosk.service
+4. Активировать сервис с помощью команды systemctl enable kiosk.service
+5. Запустить сервис с помощью команды systemctl start kiosk.service
+6. Проверить статус сервиса с помощью команды systemctl status kiosk.service
+7. Откройте crontab для редактирования
+8. Добавьте строку для запуска скрипта при старте системы: @reboot /path/to/seventh_laboratory_work/kiosk/kiosk
+
+P.S. Пропишите дополнительные прова на исполняемый файл kiosk
