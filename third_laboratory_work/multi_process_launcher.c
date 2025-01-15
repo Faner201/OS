@@ -26,18 +26,25 @@
 
 volatile int *counter;
 sem_t *counter_sem;
+sem_t *log_sem;
 int running_copies = 0;
 pid_t main_pid;
 
 void log_message(const char *message) {
+    sem_wait(log_sem);
+
     FILE *log_file = fopen(LOG_FILE, "a");
     if (log_file) {
         fprintf(log_file, "%s\n", message);
         fclose(log_file);
     }
+
+    sem_post(log_sem);
 }
 
 void log_start_message() {
+    sem_wait(log_sem);
+
     FILE *log_file = fopen(LOG_FILE, "a");
     if (log_file) {
         pid_t main_pid = getpid();
@@ -58,6 +65,8 @@ void log_start_message() {
         fprintf(log_file, "%s", start_message);
         fclose(log_file);
     }
+
+    sem_post(log_sem);
 }
 
 void *timer_process(void *arg) {
